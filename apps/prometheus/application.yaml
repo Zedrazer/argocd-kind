@@ -14,8 +14,8 @@ spec:
         pushgateway:
           enabled: false
     destination:
-    server: https://kubernetes.default.svc
-    namespace: monitoring
+      server: https://kubernetes.default.svc
+      namespace: monitoring
   syncPolicy:
     automated:
       prune: true
