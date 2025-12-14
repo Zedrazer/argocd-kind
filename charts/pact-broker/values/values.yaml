@@ -16,6 +16,11 @@ pactbroker:
   auth:
     enabled: false
 
+  webhooks:
+    enabled: false
+  basicAuth:
+    enabled: false
+
 # Optional: keep replicas at 1 for dev
 replicaCount: 1
 
