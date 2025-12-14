@@ -1,0 +1,8 @@
+service:
+  type: ClusterIP
+
+pactbroker:
+  logLevel: INFO
+  baseUrl: http://pact-broker
+  database:
+    type: sqlite

@@ -1,0 +1,89 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+## TL;DR
+
+```console
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add pact-broker https://pact-foundation.github.io/pact-broker-chart/
+
+helm install pact-broker pact-broker/pact-broker
+```
+
+## Usage
+
+The Pact Broker Chart is available in the following formats:
+- [Chart Repository](https://helm.sh/docs/topics/chart_repository/)
+- [OCI Artifacts](https://helm.sh/docs/topics/registries/)
+
+### Installing from Chart Repository
+
+The following command can be used to add the chart repository:
+
+```console
+helm repo add pact-broker https://pact-foundation.github.io/pact-broker-chart/
+```
+
+Once the chart has been added, install one of the available charts:
+
+```console
+helm install pact-broker pact-broker/pact-broker
+```
+
+### Installing from an OCI Registry
+
+Charts are also available in OCI format. The list of available charts can be found [here](https://github.com/pact-foundation/pact-broker-chart/).
+
+Install one of the available charts:
+
+```shell
+helm upgrade -i <release_name> oci://ghcr.io/pact-foundation/pact-broker-chart/pact-broker --version=<version>
+```
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}
+
+## Configuration and Installation Details
+
+### Database Configuration
+
+> **⚠️ BREAKING CHANGE in v4.0.0:** The bundled PostgreSQL subchart has been removed due to licensing changes. You must now provide your own PostgreSQL instance.
+
+Starting with version 4.0.0, this Helm chart requires an external PostgreSQL database. You can use:
+- Cloud-managed databases (AWS RDS, Google Cloud SQL, Azure Database for PostgreSQL)
+- Self-hosted PostgreSQL instances
+- Kubernetes operators (CloudNativePG, Zalando PostgreSQL Operator)
+- Any PostgreSQL-compatible database
+
+Configure the database connection by setting the following values:
+- `database.host` - Database hostname or IP address
+- `database.port` - Database port (defaults to 5432)
+- `database.adapter` - Database adapter (defaults to "postgres", can also be "sqlite")
+- `database.databaseName` - Name of the database
+
+The credential configuration has two methods:
+
+#### Specify Credentials via Values
+Configure the Pact Broker by using the username credential that you configure via the `database.auth.username` value and the password via the `database.auth.password` value.
+  > **_NOTE:_** Be careful and mindful that the values you provide here is done in a secure way.
+
+#### Specify Credentials via Secret
+Configure the Pact Broker to use an existing Secret to retrieve the user password as a means to connect to the database. Ensure that the Kubernetes Secret has the password in the `user-password` field and ensure that you have set `database.auth.existingSecret` value to the name of the secret. To configure the username, you can use the `username` value.
+
+### Database Clean Task
+Pact Broker [automatic data cleanup](https://docs.pact.io/pact_broker/docker_images/pactfoundation#automatic-data-clean-up) can be enabled by setting the property `broker.config.databaseClean.enabled` to `true`.
+
+By default and for simple installations, one could rely on the built-in integrated mode of the cleanup (the property `broker.config.databaseClean.mode` having the value `embedded`).
+
+For a more advanced setup e.g. in highly available installations with more than one replica, one should rely on the [external source pattern](https://docs.pact.io/pact_broker/docker_images/pactfoundation#running-the-clean-task-from-an-external-source) of running the clean task. That can be achieved by setting the property `broker.config.databaseClean.mode` to external, which would result in having a `CronJob` performing the cleanup task instead of the main application Pods.

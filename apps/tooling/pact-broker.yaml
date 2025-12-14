@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pact-broker
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/zedrazer/argocd-kind.git
+    targetRevision: main
+    path: charts/pact-broker
+    helm:
+      valueFiles:
+        - values/values.yaml
+      syncOptions:
+        - CreateNamespace=true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
