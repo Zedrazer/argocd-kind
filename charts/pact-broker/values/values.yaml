@@ -6,3 +6,5 @@ pactbroker:
   baseUrl: http://pact-broker
   database:
     type: sqlite
+  sqlite:
+    enabled: true
