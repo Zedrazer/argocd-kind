@@ -9,6 +9,9 @@ pactbroker:
   # Use SQLite for dev
   database:
     type: sqlite
+    existingSecret: pact-broker-db
+    usernameKey: username
+    passwordKey: password
   sqlite:
     enabled: true
 
