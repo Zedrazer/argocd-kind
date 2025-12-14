@@ -6,12 +6,18 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/grafana/helm-charts
-    path: charts/grafana
-    targetRevision: grafana-10.3.1
+    repoURL: https://grafana.github.io/helm-charts
+    chart: grafana
+    targetRevision: 10.3.1
     helm:
-      valueFiles:
-        - ../../../values/grafana/values.yaml
+      values: |
+        replicaCount: 1
+        adminUser: admin
+        adminPassword: admin
+        service:
+          type: ClusterIP
+        ingress:
+          enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring

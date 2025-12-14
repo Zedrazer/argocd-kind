@@ -1,7 +1,0 @@
-replicaCount: 1
-adminUser: admin
-adminPassword: admin
-service:
-  type: ClusterIP
-ingress:
-  enabled: false
