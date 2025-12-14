@@ -1,0 +1,216 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "common.names.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app.kubernetes.io/name: {{ include "chart.name" . }}
+    helm.sh/chart: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- with .Values.broker.labels -}}
+    {{ toYaml . | trim | nindent 4 }}
+    {{- end }}
+  {{- if .Values.broker.annotations }}
+  annotations:
+    {{- with .Values.broker.annotations -}}
+    {{ toYaml . | trim | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.broker.replicaCount }}
+  {{- if .Values.broker.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ .Values.broker.revisionHistoryLimit}}
+  {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: {{ include "chart.name" . }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "chart.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- with .Values.broker.labels -}}
+        {{ toYaml . | trim | nindent 8 }}
+        {{- end }}
+      {{- if .Values.broker.annotations }}
+      annotations:
+        {{- with .Values.broker.annotations -}}
+        {{ toYaml . | trim | nindent 8 }}
+        {{- end }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "broker.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
+      {{- if .Values.broker.imagePullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.broker.imagePullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.broker.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.broker.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ template "chart.fullname" . }}
+          image: {{ template "broker.image" . }}
+          imagePullPolicy: {{ .Values.broker.imagePullPolicy }}
+          {{- if .Values.broker.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.broker.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.broker.containerPorts.http }}
+              protocol: TCP
+            - name: https
+              containerPort: {{ .Values.broker.containerPorts.https }}
+              protocol: TCP
+          env:
+            # Logging
+            {{- include "envVars.logging" . | nindent 12 }}
+            # Database
+            {{- include "envVars.db" . | nindent 12 }}
+            # Database Cleanup (embedded mode)
+            {{- if and (.Values.broker.config.databaseClean.enabled) (eq .Values.broker.config.databaseClean.mode "embedded") }}
+            - name: PACT_BROKER_DATABASE_CLEAN_ENABLED
+              value: {{ .Values.broker.config.databaseClean.enabled | quote }}
+            - name: PACT_BROKER_DATABASE_CLEAN_CRON_SCHEDULE
+              value: {{ .Values.broker.config.databaseClean.cronSchedule | quote }}
+            {{- include "envVars.dbCleanup" . | nindent 12 }}
+            {{- end }}
+            # Authentication and authorization
+            - name: PACT_BROKER_BASIC_AUTH_ENABLED
+              value: {{ .Values.broker.config.basicAuth.enabled | quote }}
+            {{- if .Values.broker.config.basicAuth.enabled }}
+            - name: PACT_BROKER_BASIC_AUTH_USERNAME
+              {{- if .Values.broker.config.basicAuth.writeUser.username }}
+              value: {{ .Values.broker.config.basicAuth.writeUser.username }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.broker.config.basicAuth.writeUser.existingSecret }}
+                  key: {{ .Values.broker.config.basicAuth.writeUser.existingSecretUsernameKey }}
+              {{- end }}
+            {{- end }}
+            {{- if .Values.broker.config.basicAuth.enabled }}
+            - name: PACT_BROKER_BASIC_AUTH_PASSWORD
+              {{- if .Values.broker.config.basicAuth.writeUser.password }}
+              value: {{ .Values.broker.config.basicAuth.writeUser.password }}
+              {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.broker.config.basicAuth.writeUser.existingSecret }}
+                  key: {{ .Values.broker.config.basicAuth.writeUser.existingSecretPasswordKey }}
+              {{- end }}
+            {{- end }}
+            {{- if .Values.broker.config.basicAuth.enabled }}
+            - name: PACT_BROKER_BASIC_AUTH_READ_ONLY_USERNAME
+              {{- if .Values.broker.config.basicAuth.readUser.username }}
+              value: {{ .Values.broker.config.basicAuth.readUser.username }}
+              {{- else if .Values.broker.config.basicAuth.readUser.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.broker.config.basicAuth.readUser.existingSecret }}
+                  key: {{ .Values.broker.config.basicAuth.readUser.existingSecretUsernameKey }}
+              {{- end }}
+            {{- end }}
+            {{- if .Values.broker.config.basicAuth.enabled }}
+            - name: PACT_BROKER_BASIC_AUTH_READ_ONLY_PASSWORD
+              {{- if .Values.broker.config.basicAuth.readUser.password }}
+              value: {{ .Values.broker.config.basicAuth.readUser.password }}
+              {{- else if .Values.broker.config.basicAuth.readUser.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.broker.config.basicAuth.readUser.existingSecret }}
+                  key: {{ .Values.broker.config.basicAuth.readUser.existingSecretPasswordKey }}
+              {{- end }}
+            {{- end }}
+            - name: PACT_BROKER_ALLOW_PUBLIC_READ
+              value: {{ .Values.broker.config.basicAuth.allowPublicRead | quote }}
+            - name: PACT_BROKER_PUBLIC_HEARTBEAT
+              value: {{ .Values.broker.config.basicAuth.publicHeartbeat | quote }}
+            - name: PACT_BROKER_ENABLE_PUBLIC_BADGE_ACCESS
+              value: {{ .Values.broker.config.basicAuth.enablePublicBadgeAccess | quote }}
+            # Webhooks
+            - name: PACT_BROKER_WEBHOOK_RETRY_SCHEDULE
+              value: {{ .Values.broker.config.webhookRetrySchedule | quote }}
+            - name: PACT_BROKER_WEBHOOK_HTTP_METHOD_WHITELIST
+              value: {{ .Values.broker.config.webhookHttpMethodWhitelist | quote }}
+            - name: PACT_BROKER_WEBHOOK_HTTP_CODE_SUCCESS
+              value: {{ .Values.broker.config.webhookHttpCodeSuccess | quote }}
+            - name: PACT_BROKER_WEBHOOK_SCHEME_WHITELIST
+              value: {{ .Values.broker.config.webhookSchemeWhitelist | quote }}
+            {{- if .Values.broker.config.webhookHostWhitelist }}
+            - name: PACT_BROKER_WEBHOOK_HOST_WHITELIST
+              value: {{ .Values.broker.config.webhookHostWhitelist | quote }}
+            {{- end }}
+            - name: PACT_BROKER_DISABLE_SSL_VERIFICATION
+              value: {{ .Values.broker.config.disable_ssl | quote }}
+            # Resources
+            - name: PACT_BROKER_PORT
+              value: {{ .Values.broker.containerPorts.http | quote }}
+            {{- if .Values.broker.config.baseUrl }}
+            - name: PACT_BROKER_BASE_URL
+              value: {{ .Values.broker.config.baseUrl | quote }}
+            {{- end }}
+            - name: PACT_BROKER_SHIELDS_IO_BASE_URL
+              value: {{ .Values.broker.config.shieldsIoBaseUrl | quote }}
+            - name: PACT_BROKER_BADGE_PROVIDER_MODE
+              value: {{ .Values.broker.config.badgeProviderMode | quote }}
+            - name: PACT_BROKER_ENABLE_DIAGNOSTIC_ENDPOINTS
+              value: {{ .Values.broker.config.enableDiagnosticEndpoints | quote }}
+            - name: PACT_BROKER_USE_HAL_BROWSER
+              value: {{ .Values.broker.config.useHalBrowser | quote }}
+            # Domain
+            - name: PACT_BROKER_CHECK_FOR_POTENTIAL_DUPLICATE_PACTICIPANT_NAMES
+              value: {{ .Values.broker.config.checkForPotentialDuplicatePacticipantNames | quote }}
+            - name: PACT_BROKER_CREATE_DEPLOYED_VERSIONS_FOR_TAGS
+              value: {{ .Values.broker.config.createDeployedVersionsForTags | quote }}
+            - name: PACT_BROKER_USE_FIRST_TAG_AS_BRANCH
+              value: {{ .Values.broker.config.useFirstTagAsBranch | quote }}
+            - name: PACT_BROKER_AUTO_DETECT_MAIN_BRANCH
+              value: {{ .Values.broker.config.autoDetectMainBranch | quote }}
+            - name: PACT_BROKER_MAIN_BRANCH_CANDIDATES
+              value: {{ .Values.broker.config.mainBranchCandidates | quote }}
+            - name: PACT_BROKER_ALLOW_DANGEROUS_CONTRACT_MODIFICATION
+              value: {{ .Values.broker.config.allowDangerousContractModification | quote }}
+            - name: PACT_BROKER_PACT_CONTENT_DIFF_TIMEOUT
+              value: {{ .Values.broker.config.pactContentDiffTimeout | quote }}
+            # Miscellaneous
+            {{- if .Values.broker.config.features }}
+            - name: PACT_BROKER_FEATURES
+              value: {{ .Values.broker.config.features | quote }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.broker.resources | nindent 12 }}
+          volumeMounts:
+          {{- toYaml .Values.broker.volumeMounts | nindent 12 }}
+          {{- if .Values.broker.livenessProbe.enabled }}
+          livenessProbe: {{- omit .Values.broker.livenessProbe "enabled" | toYaml | nindent 12 }}
+            httpGet:
+              path: /diagnostic/status/heartbeat
+              port: http
+          {{- end }}
+          {{- if .Values.broker.readinessProbe.enabled }}
+          readinessProbe: {{- omit .Values.broker.readinessProbe "enabled" | toYaml | nindent 12 }}
+            httpGet:
+              path: /diagnostic/status/heartbeat
+              port: http
+          {{- end }}
+      {{- with .Values.broker.extraContainers }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+      {{- if .Values.broker.nodeSelector }}
+      nodeSelector:
+      {{- toYaml .Values.broker.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.broker.tolerations }}
+      tolerations:
+      {{- toYaml .Values.broker.tolerations | nindent 8 }}
+      {{- end }}
+      {{- if .Values.broker.affinity }}
+      affinity:
+      {{- toYaml .Values.broker.affinity | nindent 8 }}
+      {{- end }}
+      volumes:
+      {{- toYaml .Values.broker.volumes | nindent 8 }}
