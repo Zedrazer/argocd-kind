@@ -8,3 +8,5 @@ pactbroker:
     type: sqlite
   sqlite:
     enabled: true
+  auth:
+    enabled: false
