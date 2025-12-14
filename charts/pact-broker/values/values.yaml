@@ -1,12 +1,24 @@
+# Minimal dev configuration for Argo CD
 service:
   type: ClusterIP
 
 pactbroker:
   logLevel: INFO
   baseUrl: http://pact-broker
+
+  # Use SQLite for dev
   database:
     type: sqlite
   sqlite:
     enabled: true
+
+  # Disable authentication entirely for dev
   auth:
     enabled: false
+
+# Optional: keep replicas at 1 for dev
+replicaCount: 1
+
+# Optional: no ingress for dev
+ingress:
+  enabled: false
