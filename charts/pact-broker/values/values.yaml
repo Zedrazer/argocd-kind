@@ -12,14 +12,14 @@ pactbroker:
   sqlite:
     enabled: true
 
-  # Disable authentication entirely for dev
-  auth:
-    enabled: false
-
   webhooks:
     enabled: false
-  basicAuth:
-    enabled: false
+
+  auth:
+    enabled: true
+    existingSecret: pact-broker-auth
+    usernameKey: username
+    passwordKey: password
 
 # Optional: keep replicas at 1 for dev
 replicaCount: 1
