@@ -14,7 +14,7 @@ spec:
             namespace: nginx-staging
             valuesFile: ../../values/nginx/test.yaml
           - name: int
-            namespace: nginx-prod
+            namespace: nginx-int
             valuesFile: ../../values/nginx/int.yaml
 
   template:
