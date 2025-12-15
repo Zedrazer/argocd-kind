@@ -20,3 +20,6 @@ auth:
   enabled: true
   username: admin
   password: admin
+
+ingress:
+  enabled: false
