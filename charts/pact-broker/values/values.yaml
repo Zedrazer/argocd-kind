@@ -1,16 +1,17 @@
 broker:
-  baseUrl: http://pact-broker
-  basicAuth:
-    enabled: true
-    allowPublicRead: false
-    publicHeartbeat: true
-    enablePublicBadgeAccess: false
-    writeUser:
-      username: "admin"
-      password: "admin"
-    readUser:
-      username: "pactreader"
-      password: "pactreader"
+  config:
+    baseUrl: http://pact-broker
+    basicAuth:
+      enabled: true
+      allowPublicRead: false
+      publicHeartbeat: true
+      enablePublicBadgeAccess: false
+      writeUser:
+        username: "admin"
+        password: "admin"
+      readUser:
+        username: "pactreader"
+        password: "pactreader"
 
 service:
   type: ClusterIP
