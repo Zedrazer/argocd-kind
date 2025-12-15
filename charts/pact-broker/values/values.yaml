@@ -1,32 +1,19 @@
-# Minimal dev configuration for Argo CD
 service:
   type: ClusterIP
 
 pactbroker:
-  logLevel: INFO
   baseUrl: http://pact-broker
+  logLevel: INFO
 
-  # Use SQLite for dev
   database:
-    type: sqlite
-    existingSecret: pact-broker-db
-    usernameKey: username
-    passwordKey: password
-  sqlite:
-    enabled: true
+    type: postgres
+    host: postgres.platform.svc.cluster.local
+    port: 5432
+    name: pactbroker
+    username: pactbroker
+    password: pactbroker
 
-  webhooks:
-    enabled: false
-
-  auth:
-    enabled: true
-    existingSecret: pact-broker-auth
-    usernameKey: username
-    passwordKey: password
-
-# Optional: keep replicas at 1 for dev
-replicaCount: 1
-
-# Optional: no ingress for dev
-ingress:
-  enabled: false
+auth:
+  enabled: true
+  username: admin
+  password: admin

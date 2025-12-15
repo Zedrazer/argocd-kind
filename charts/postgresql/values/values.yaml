@@ -1,0 +1,9 @@
+auth:
+  postgresPassword: postgres
+  username: pactbroker
+  password: pactbroker
+  database: pactbroker
+
+primary:
+  persistence:
+    enabled: false
