@@ -9,13 +9,13 @@ spec:
         elements:
           - name: dev
             namespace: nginx-dev
-            valuesFile: values/nginx/dev.yaml
+            valuesFile: ../../values/nginx/dev.yaml
           - name: test
             namespace: nginx-staging
-            valuesFile: values/nginx/test.yaml
+            valuesFile: ../../values/nginx/test.yaml
           - name: int
             namespace: nginx-prod
-            valuesFile: values/nginx/int.yaml
+            valuesFile: ../../values/nginx/int.yaml
 
   template:
     metadata:
