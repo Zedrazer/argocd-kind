@@ -1,9 +1,19 @@
+broker:
+  baseUrl: http://pact-broker
+  basicAuth:
+    enabled: true
+    allowPublicRead: false
+    publicHeartbeat: true
+    enablePublicBadgeAccess: false
+    writeUser:
+      username: "admin"
+      password: "admin"
+    readUser:
+      username: "pactreader"
+      password: "pactreader"
+
 service:
   type: ClusterIP
-
-pactbroker:
-  baseUrl: http://pact-broker
-  logLevel: INFO
 
 database:
   adapter: postgres
@@ -14,18 +24,6 @@ database:
     username: pactbroker
     password: pactbroker
     existingSecretPasswordKey: "password"
-
-basicAuth:
-  enabled: true
-  allowPublicRead: false
-  publicHeartbeat: true
-  enablePublicBadgeAccess: false
-  writeUser:
-    username: "admin"
-    password: "admin"
-  readUser:
-    username: "pactreader"
-    password: "pactreader"
 
 ingress:
   enabled: false
