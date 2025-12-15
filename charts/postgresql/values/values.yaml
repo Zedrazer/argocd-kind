@@ -1,3 +1,7 @@
+image:
+  repository: bitnami/postgresql
+  tag: latest
+
 auth:
   postgresPassword: postgres
   username: pactbroker
@@ -7,8 +11,3 @@ auth:
 primary:
   persistence:
     enabled: false
-
-image:
-  registry: docker.io
-  repository: postgres
-  tag: "15"
