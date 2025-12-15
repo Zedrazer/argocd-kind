@@ -14,8 +14,6 @@ spec:
     helm:
       valueFiles:
         - values/values.yaml
-      syncOptions:
-        - CreateNamespace=true
   destination:
     server: https://kubernetes.default.svc
     namespace: platform

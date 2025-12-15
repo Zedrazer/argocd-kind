@@ -17,8 +17,6 @@ spec:
       parameters:
         - name: fullnameOverride
           value: postgres
-      syncOptions:
-        - CreateNamespace=true
   destination:
     server: https://kubernetes.default.svc
     namespace: platform
