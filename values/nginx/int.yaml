@@ -2,3 +2,6 @@ replicaCount: 2
 
 service:
   type: ClusterIP
+
+image:
+  tag: latest
