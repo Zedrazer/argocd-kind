@@ -13,7 +13,7 @@ spec:
     path: charts/postgresql
     helm:
       valueFiles:
-        - values/values.yaml
+        - ../../values/postgres/values.yaml
       parameters:
         - name: fullnameOverride
           value: postgres

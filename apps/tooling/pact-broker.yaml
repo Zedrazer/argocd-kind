@@ -13,7 +13,7 @@ spec:
     path: charts/pact-broker
     helm:
       valueFiles:
-        - values/values.yaml
+        - ../../values/pact-broker/values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: platform
