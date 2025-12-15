@@ -5,8 +5,11 @@ image:
 auth:
   postgresPassword: postgres
   username: pactbroker
-  password: pactbroker
   database: pactbroker
+  existingSecret: "pact-broker-postgres-secret"
+  secretKeys:
+    adminPasswordKey: postgresPassword
+    userPasswordKey: userPassword
 
 primary:
   persistence:

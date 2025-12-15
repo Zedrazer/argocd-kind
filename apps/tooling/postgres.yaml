@@ -26,3 +26,13 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pact-broker-postgres-secret
+  namespace: platform
+type: Opaque
+stringData:
+  postgresPassword: pactbroker
+  userPassword: pactbroker
