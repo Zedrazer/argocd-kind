@@ -1,19 +1,20 @@
-service:
-  type: ClusterIP
-
 pactbroker:
   baseUrl: http://pact-broker
   logLevel: INFO
-
   database:
     type: postgres
     host: postgres.platform.svc.cluster.local
     port: 5432
     name: pactbroker
-    username: pactbroker
-    password: pactbroker
+    existingSecret: pact-broker-db-pg
+    usernameKey: username
+    passwordKey: password
 
 auth:
   enabled: true
   username: admin
   password: admin
+
+service:
+  type: ClusterIP
+
