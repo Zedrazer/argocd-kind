@@ -1,19 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: pact-broker
+  name: postgres
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   project: default
   source:
     repoURL: https://github.com/zedrazer/argocd-kind.git
     targetRevision: main
-    path: charts/pact-broker
+    path: charts/postgresql
     helm:
       valueFiles:
         - values/values.yaml
+      parameters:
+        - name: fullnameOverride
+          value: postgres
       syncOptions:
         - CreateNamespace=true
   destination:
