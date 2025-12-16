@@ -1,6 +1,6 @@
 broker:
   config:
-    baseUrl: http://pact-broker
+    baseUrl: http://localhost:8989
     basicAuth:
       enabled: true
       allowPublicRead: false
